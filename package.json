@@ -3,18 +3,25 @@
   "version": "1.0.0",
   "description": "Proyecto Pastas Milisenda",
   "main": "app.js",
-  "type": "module",
-  "scripts": {
-    "start": "node app.js"
+  "type": "module",  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed": "node test-example.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
+  "license": "ISC",  "dependencies": {
     "express": "^4.21.2",
     "express-handlebars": "^8.0.1",
     "mongodb": "6.15",
     "mongoose": "^8.12.2",
-    "mongoose-paginate-v2": "^1.9.0"
+    "mongoose-paginate-v2": "^1.9.0",
+    "dotenv": "^16.0.3",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.1",
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.0",
+    "uuid": "^9.0.0"
   }
 }

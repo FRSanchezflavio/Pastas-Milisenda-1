@@ -1,25 +1,32 @@
-import {
-  getCartById,
-  createCart,
-  updateCart as updateCartDao,
-  clearCart as clearCartDao,
-  deleteProductFromCart as deleteProductFromCartDao,
-  updateProductQuantity as updateProductQuantityDao
-} from '../dao/cart.dao.js';
+import { cartRepository } from '../repositories/cart.repository.js';
+import { ticketService } from '../services/ticket.service.js';
 
-// GET /api/carts/:cid
 export const getCart = async (req, res) => {
   try {
     const { cid } = req.params;
-    const cart = await getCartById(cid);
+    const cart = await cartRepository.getCartById(cid);
     if (!cart) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
     }
 
-    // Renderizas la vista 'cart' si así lo deseas
     res.render('cart', { cart });
-    // O devuelves JSON:
-    // res.json({ status: 'success', cart });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: 'error', error: error.message });
+  }
+};
+
+export const addProductToCart = async (req, res) => {
+  try {
+    const { cid, pid } = req.params;
+    const { quantity = 1 } = req.body;
+    
+    const updatedCart = await cartRepository.addProductToCart(cid, pid, quantity);
+    if (!updatedCart) {
+      return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
+    }
+    
+    res.json({ status: 'success', cart: updatedCart });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: 'error', error: error.message });
@@ -30,7 +37,7 @@ export const getCart = async (req, res) => {
 export const deleteProductFromCart = async (req, res) => {
   try {
     const { cid, pid } = req.params;
-    const updatedCart = await deleteProductFromCartDao(cid, pid);
+    const updatedCart = await cartRepository.deleteProductFromCart(cid, pid);
     if (!updatedCart) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
     }
@@ -55,7 +62,7 @@ export const updateCartProducts = async (req, res) => {
       });
     }
 
-    const updated = await updateCartDao(cid, products);
+    const updated = await cartRepository.updateCart(cid, products);
     if (!updated) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
     }
@@ -77,7 +84,7 @@ export const updateProductQuantity = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Falta la cantidad' });
     }
 
-    const updatedCart = await updateProductQuantityDao(cid, pid, quantity);
+    const updatedCart = await cartRepository.updateProductQuantity(cid, pid, quantity);
     if (!updatedCart) {
       return res.status(404).json({ status: 'error', message: 'Carrito o producto no encontrado' });
     }
@@ -92,12 +99,42 @@ export const updateProductQuantity = async (req, res) => {
 export const clearCart = async (req, res) => {
   try {
     const { cid } = req.params;
-    // Ojo: Llamamos a la función 'clearCartDao' para que no colisione con la nuestra
-    const cleared = await clearCartDao(cid);
+    const cleared = await cartRepository.clearCart(cid);
     if (!cleared) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
     }
     res.json({ status: 'success', cart: cleared });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status: 'error', error: error.message });
+  }
+};
+
+// POST /api/carts/:cid/purchase
+export const purchaseCart = async (req, res) => {
+  try {
+    const { cid } = req.params;
+    const purchaserEmail = req.user.email;
+
+    const result = await ticketService.processPurchase(cid, purchaserEmail);
+
+    if (!result.success) {
+      return res.status(400).json({
+        status: 'error',
+        message: result.message,
+        productsNotProcessed: result.productsNotProcessed
+      });
+    }
+
+    res.json({
+      status: 'success',
+      message: 'Compra procesada exitosamente',
+      payload: {
+        ticket: result.ticket,
+        productsNotProcessed: result.productsNotProcessed,        totalAmount: result.totalAmount,
+        processedProducts: result.processedProducts
+      }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: 'error', error: error.message });

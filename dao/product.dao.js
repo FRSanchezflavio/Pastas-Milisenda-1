@@ -1,24 +1,43 @@
 import Product from '../models/product.model.js';
 
-export const getProducts = async ({ limit, page, sort, query }) => {
-  let filter = {};
-  if (query) {
-    filter = { category: { $regex: query, $options: 'i' } };
+export class ProductDAO {
+  async getProducts({ limit, page, sort, query }) {
+    let filter = {};
+    if (query) {
+      filter = { category: { $regex: query, $options: 'i' } };
+    }
+
+    const options = {
+      limit: limit || 10,
+      page: page || 1,
+      sort: {}
+    };
+
+    if (sort === 'asc') options.sort = { price: 1 };
+    if (sort === 'desc') options.sort = { price: -1 };
+
+    return await Product.paginate(filter, options);
   }
 
-  const options = {
-    limit:  limit || 10,
-    page:   page  || 1,
-    sort:   {}
-  };
+  async getProductById(id) {
+    return await Product.findById(id);
+  }
 
-  if (sort === 'asc')  options.sort = { price: 1 };
-  if (sort === 'desc') options.sort = { price: -1 };
+  async create(productData) {
+    return await Product.create(productData);
+  }
 
-  const result = await Product.paginate(filter, options);
-  return result;
-};
+  async update(id, productData) {
+    return await Product.findByIdAndUpdate(id, productData, { new: true });
+  }
 
-export const getProductById = async (id) => {
-  return Product.findById(id);
-};
+  async delete(id) {
+    return await Product.findByIdAndDelete(id);
+  }
+
+  async updateStock(id, newStock) {
+    return await Product.findByIdAndUpdate(id, { stock: newStock }, { new: true });
+  }
+}
+
+export const productDAO = new ProductDAO();

@@ -1,37 +1,59 @@
 # Pastas Milisenda
 
-Este es el proyecto final de Back-End para una tienda de pastas, utilizando MongoDB como persistencia.
+Aplicación de e-commerce para venta de pastas desarrollada con Node.js y MongoDB.
 
 ## Instalación
 
-1. Clona este repositorio:
-   git clone https://github.com/tuUsuario/pastas-milisenda.git
-2. Entra al directorio del proyecto:
-   cd pastas-milisenda
-3. Instala las dependencias:
-   npm install
+```bash
+npm install
+```
 
-## Uso
+## Configuración
 
-1. Inicia el servidor:
-   npm start
-2. Abre tu navegador en http://localhost:8080
+Crear archivo `.env` con:
+```
+PORT=8080
+MONGO_URI=mongodb://localhost:27017/pastasMilisenda
+JWT_SECRET=mi_clave_secreta
+JWT_EXPIRATION=24h
+ADMIN_EMAIL=admin@milisenda.com
+```
 
-## Tecnologías usadas
+## Ejecutar
+
+```bash
+npm start
+```
+
+## Estructura
+
+- `models/` - Modelos de MongoDB
+- `dao/` - Acceso a datos
+- `controllers/` - Lógica de controladores
+- `routes/` - Definición de rutas
+- `middlewares/` - Middlewares de autenticación
+
+## API
+
+### Autenticación
+- `POST /api/sessions/register` - Registro
+- `POST /api/sessions/login` - Login
+- `GET /api/sessions/current` - Usuario actual
+
+### Productos
+- `GET /api/products` - Listar productos
+- `POST /api/products` - Crear producto (admin)
+- `PUT /api/products/:id` - Actualizar producto (admin)
+- `DELETE /api/products/:id` - Eliminar producto (admin)
+
+### Carrito
+- `POST /api/carts/:cid/product/:pid` - Agregar producto
+- `POST /api/carts/:cid/purchase` - Finalizar compra
+
+## Tecnologías
 
 - Node.js
 - Express
-- MongoDB / Mongoose
-- Handlebars
-
-## Rutas Principales
-
-- GET /api/products
-- GET /api/products/:pid
-- ...
-- GET /api/carts/:cid
-- ...
-
-## Repositorio
-
-[https://github.com/tuUsuario/pastas-milisenda](https://github.com/tuUsuario/pastas-milisenda)
+- MongoDB
+- JWT
+- Bcrypt
